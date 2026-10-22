@@ -10,6 +10,7 @@ import (
 type BatchRequest struct {
 	Action Action `json:"action"`
 	// Operation arguments (varies with specified `action`).
+	// Example: {"name":"Betty Jane McCamey","company":"Vita Foods Inc.","email":"betty@mccamey.com"}
 	Body map[string]any `json:"body"`
 }
 
@@ -105,4 +106,27 @@ func (o BatchRequest) String() string {
 	out += fmt.Sprintf("  body=%v\n", o.Body)
 
 	return fmt.Sprintf("BatchRequest {\n%s}", out)
+}
+
+// BatchRequestFieldExamples maps each field (by its JSON name) to its spec example value.
+var BatchRequestFieldExamples = map[string]string{
+	"body": "{\"name\":\"Betty Jane McCamey\",\"company\":\"Vita Foods Inc.\",\"email\":\"betty@mccamey.com\"}",
+}
+
+// FieldExample returns the spec example for a field by its JSON name, or an empty string if the
+// field has no example.
+func (o BatchRequest) FieldExample(field string) string {
+	return BatchRequestFieldExamples[field]
+}
+
+// BatchRequestFieldDescriptions maps each field (by its JSON name) to its spec description, useful
+// for displaying help for a field.
+var BatchRequestFieldDescriptions = map[string]string{
+	"body": "Operation arguments (varies with specified `action`).",
+}
+
+// FieldDescription returns the spec description for a field by its JSON name, or an empty string if
+// the field has no description.
+func (o BatchRequest) FieldDescription(field string) string {
+	return BatchRequestFieldDescriptions[field]
 }

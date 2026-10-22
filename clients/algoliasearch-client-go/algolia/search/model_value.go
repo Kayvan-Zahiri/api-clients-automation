@@ -194,3 +194,16 @@ func (o Value) String() string {
 
 	return fmt.Sprintf("Value {\n%s}", out)
 }
+
+// ValueFieldDescriptions maps each field (by its JSON name) to its spec description, useful
+// for displaying help for a field.
+var ValueFieldDescriptions = map[string]string{
+	"order": "Explicit order of facets or facet values.\n\nThis setting lets you always show specific facets or facet values at the top of the list.\n",
+	"hide":  "Hide facet values.",
+}
+
+// FieldDescription returns the spec description for a field by its JSON name, or an empty string if
+// the field has no description.
+func (o Value) FieldDescription(field string) string {
+	return ValueFieldDescriptions[field]
+}

@@ -12,6 +12,7 @@ type MultipleBatchRequest struct {
 	// Operation arguments (varies with specified `action`).
 	Body map[string]any `json:"body,omitempty"`
 	// Index name (case-sensitive).
+	// Example: products
 	IndexName string `json:"indexName"`
 }
 
@@ -162,4 +163,28 @@ func (o MultipleBatchRequest) String() string {
 	out += fmt.Sprintf("  indexName=%v\n", o.IndexName)
 
 	return fmt.Sprintf("MultipleBatchRequest {\n%s}", out)
+}
+
+// MultipleBatchRequestFieldExamples maps each field (by its JSON name) to its spec example value.
+var MultipleBatchRequestFieldExamples = map[string]string{
+	"indexName": "products",
+}
+
+// FieldExample returns the spec example for a field by its JSON name, or an empty string if the
+// field has no example.
+func (o MultipleBatchRequest) FieldExample(field string) string {
+	return MultipleBatchRequestFieldExamples[field]
+}
+
+// MultipleBatchRequestFieldDescriptions maps each field (by its JSON name) to its spec description, useful
+// for displaying help for a field.
+var MultipleBatchRequestFieldDescriptions = map[string]string{
+	"body":      "Operation arguments (varies with specified `action`).",
+	"indexName": "Index name (case-sensitive).",
+}
+
+// FieldDescription returns the spec description for a field by its JSON name, or an empty string if
+// the field has no description.
+func (o MultipleBatchRequest) FieldDescription(field string) string {
+	return MultipleBatchRequestFieldDescriptions[field]
 }

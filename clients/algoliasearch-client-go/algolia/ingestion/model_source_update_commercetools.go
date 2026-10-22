@@ -442,3 +442,19 @@ func (o SourceUpdateCommercetools) String() string {
 
 	return fmt.Sprintf("SourceUpdateCommercetools {\n%s}", out)
 }
+
+// SourceUpdateCommercetoolsFieldDescriptions maps each field (by its JSON name) to its spec description, useful
+// for displaying help for a field.
+var SourceUpdateCommercetoolsFieldDescriptions = map[string]string{
+	"locales":                        "Locales for your commercetools stores.",
+	"fallbackIsInStockValue":         "Whether a fallback value is stored in the Algolia record if there's no inventory information about the product.\n",
+	"productQueryPredicate":          "Predicate to filter out specific products when indexing. For more information, see [Query Predicate](https://docs.commercetools.com/api/predicates/query).\n",
+	"useImagesObjects":               "When set to true, the connector indexes objects with all images attributes instead of only the URLs.\n",
+	"categoriesCustomFieldsFullPath": "When set to true, the connector uses the complete category path (e.g. \"Root > Level 1 > Category name\") in `categoriesCustomFields`.\n",
+}
+
+// FieldDescription returns the spec description for a field by its JSON name, or an empty string if
+// the field has no description.
+func (o SourceUpdateCommercetools) FieldDescription(field string) string {
+	return SourceUpdateCommercetoolsFieldDescriptions[field]
+}

@@ -129,3 +129,15 @@ func (o TransformationTryResponse) String() string {
 
 	return fmt.Sprintf("TransformationTryResponse {\n%s}", out)
 }
+
+// TransformationTryResponseFieldDescriptions maps each field (by its JSON name) to its spec description, useful
+// for displaying help for a field.
+var TransformationTryResponseFieldDescriptions = map[string]string{
+	"payloads": "The array of stringified records returned by the transformation service.",
+}
+
+// FieldDescription returns the spec description for a field by its JSON name, or an empty string if
+// the field has no description.
+func (o TransformationTryResponse) FieldDescription(field string) string {
+	return TransformationTryResponseFieldDescriptions[field]
+}
