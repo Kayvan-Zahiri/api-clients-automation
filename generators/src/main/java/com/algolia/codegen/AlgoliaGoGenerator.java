@@ -97,8 +97,11 @@ public class AlgoliaGoGenerator extends GoClientCodegen {
     for (ModelMap modelMap : objs.getModels()) {
       CodegenModel model = modelMap.getModel();
       if (model.isEnum) {
+        addEnumDescriptionLiterals(model);
         continue;
       }
+
+      addFieldMetadata(model);
 
       for (CodegenProperty param : Iterables.concat(model.vars, model.allVars, model.requiredVars, model.optionalVars)) {
         if (!param.isNullable || param.isContainer || param.isFreeFormObject || (param.isAnyType && !param.isModel)) {
@@ -179,5 +182,113 @@ public class AlgoliaGoGenerator extends GoClientCodegen {
     }
 
     return operations;
+  }
+
+  // addFieldMetadata exposes Go-safe literals for the template's FieldExamples and
+  // FieldDescriptions maps, which only iterate model.vars.
+  private static void addFieldMetadata(CodegenModel model) {
+    boolean hasFieldExamples = false;
+    boolean hasFieldDescriptions = false;
+    boolean clashesWithAccessor = false;
+
+    for (CodegenProperty param : model.vars) {
+      clashesWithAccessor |= "FieldExample".equals(param.name) || "FieldDescription".equals(param.name);
+      param.vendorExtensions.put("x-go-basename-literal", goStringLiteral(param.baseName));
+
+      // OpenAPI Generator fabricates the string "null" as the example of any property without one.
+      if ("null".equals(param.example)) {
+        param.example = null;
+      }
+
+      if (param.example != null && !param.example.isEmpty()) {
+        param.vendorExtensions.put("x-go-example-literal", goStringLiteral(param.example));
+        // a line break would end the `// Example:` comment and turn the rest into Go code.
+        param.example = singleLine(param.example);
+        hasFieldExamples = true;
+      }
+
+      // param.description is pre-escaped for comments (quotes become \"), so the literal needs the
+      // unescaped one.
+      String description = param.unescapedDescription != null ? param.unescapedDescription : param.description;
+      if (description != null && !description.isEmpty()) {
+        param.vendorExtensions.put("x-go-description-literal", goStringLiteral(description));
+        hasFieldDescriptions = true;
+      }
+    }
+
+    // a field named like an accessor would not compile next to the generated method.
+    if (hasFieldExamples && !clashesWithAccessor) {
+      model.vendorExtensions.put("x-has-field-examples", true);
+    }
+    if (hasFieldDescriptions && !clashesWithAccessor) {
+      model.vendorExtensions.put("x-has-field-descriptions", true);
+    }
+  }
+
+  private static String singleLine(String s) {
+    return s.replaceAll("\\s*[\\r\\n]+\\s*", " ");
+  }
+
+  // addEnumDescriptionLiterals attaches a Go-safe description literal to each enum value that has
+  // an
+  // x-enum-descriptions entry, and flags the model so the template emits a Description() accessor.
+  @SuppressWarnings("unchecked")
+  private static void addEnumDescriptionLiterals(CodegenModel model) {
+    if (model.allowableValues == null) {
+      return;
+    }
+    Object raw = model.allowableValues.get("enumVars");
+    if (!(raw instanceof List)) {
+      return;
+    }
+    boolean hasDescriptions = false;
+    for (Object entry : (List<Object>) raw) {
+      if (!(entry instanceof Map)) {
+        continue;
+      }
+      Map<String, Object> enumVar = (Map<String, Object>) entry;
+      Object description = enumVar.get("enumDescription");
+      if (description != null && !description.toString().isEmpty()) {
+        enumVar.put("x-go-enum-description-literal", goStringLiteral(description.toString()));
+        enumVar.put("enumDescription", singleLine(description.toString()));
+        hasDescriptions = true;
+      }
+    }
+    if (hasDescriptions) {
+      model.vendorExtensions.put("x-has-enum-descriptions", true);
+    }
+  }
+
+  // goStringLiteral turns an arbitrary string into a double-quoted Go string literal, escaping the
+  // characters that would otherwise break the literal (examples often contain quotes and JSON).
+  private static String goStringLiteral(String s) {
+    StringBuilder sb = new StringBuilder("\"");
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      switch (c) {
+        case '\\':
+          sb.append("\\\\");
+          break;
+        case '"':
+          sb.append("\\\"");
+          break;
+        case '\n':
+          sb.append("\\n");
+          break;
+        case '\r':
+          sb.append("\\r");
+          break;
+        case '\t':
+          sb.append("\\t");
+          break;
+        default:
+          if (c < 0x20 || c == 0x7f) {
+            sb.append(String.format("\\u%04x", (int) c));
+          } else {
+            sb.append(c);
+          }
+      }
+    }
+    return sb.append("\"").toString();
   }
 }

@@ -7,7 +7,8 @@ const (
 	{{#enumVars}}
 	{{^-first}}
 	{{/-first}}
-	{{#enumClassPrefix}}{{#lambda.screamingSnakeCase}}{{{classname}}}{{/lambda.screamingSnakeCase}}_{{/enumClassPrefix}}{{name}} {{{classname}}} = {{{value}}}
+	{{#enumDescription}}// {{#enumClassPrefix}}{{#lambda.screamingSnakeCase}}{{{classname}}}{{/lambda.screamingSnakeCase}}_{{/enumClassPrefix}}{{name}} {{{enumDescription}}}
+	{{/enumDescription}}{{#enumClassPrefix}}{{#lambda.screamingSnakeCase}}{{{classname}}}{{/lambda.screamingSnakeCase}}_{{/enumClassPrefix}}{{name}} {{{classname}}} = {{{value}}}
 	{{/enumVars}}
 	{{/allowableValues}}
 )
@@ -68,3 +69,21 @@ func (v {{{classname}}}) Ptr() *{{{classname}}} {
 func (v {{{classname}}}) Values() []{{{classname}}} {
 	return Allowed{{{classname}}}EnumValues
 }
+{{#vendorExtensions.x-has-enum-descriptions}}
+
+// {{{classname}}}Descriptions maps each value to its spec description.
+var {{{classname}}}Descriptions = map[{{{classname}}}]string{
+	{{#allowableValues}}
+	{{#enumVars}}
+	{{#enumDescription}}
+	{{{value}}}: {{{x-go-enum-description-literal}}},
+	{{/enumDescription}}
+	{{/enumVars}}
+	{{/allowableValues}}
+}
+
+// Description returns the human readable description of the value, or an empty string when it has none.
+func (v {{{classname}}}) Description() string {
+	return {{{classname}}}Descriptions[v]
+}
+{{/vendorExtensions.x-has-enum-descriptions}}
